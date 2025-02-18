@@ -1,56 +1,56 @@
-# İsim Listem Projesi Commit Kuralları
+# Name List Project Commit Rules
 
-# Commit Mesajı Formatı
+# Commit Message Format
 format:
   title: "<type>(<scope>): <description>"
-  description: "Detaylı açıklama (isteğe bağlı)"
+  description: "Detailed description (optional)"
 
-# Commit Tipleri
+# Commit Types
 types:
-  - feat     # Yeni özellik
-  - fix      # Hata düzeltmesi
-  - refactor # Kod yeniden düzenleme
-  - style    # Stil değişiklikleri (boşluk, format, noktalama vb.)
-  - docs     # Dokümantasyon değişiklikleri
-  - test     # Test ekleme veya düzenleme
-  - chore    # Yapılandırma, derleme vb. değişiklikler
-  - perf     # Performans iyileştirmeleri
+  - feat     # New feature
+  - fix      # Bug fix
+  - refactor # Code refactoring
+  - style    # Style changes (whitespace, formatting, punctuation etc.)
+  - docs     # Documentation changes
+  - test     # Adding or modifying tests
+  - chore    # Configuration, build etc. changes
+  - perf     # Performance improvements
 
-# Commit Kapsamları
+# Commit Scopes
 scopes:
-  - auth     # Kimlik doğrulama ile ilgili değişiklikler
-  - ui       # Kullanıcı arayüzü değişiklikleri
-  - api      # API ile ilgili değişiklikler
-  - db       # Veritabanı ile ilgili değişiklikler
-  - core     # Çekirdek fonksiyonlar
-  - config   # Yapılandırma değişiklikleri
-  - deps     # Bağımlılık güncellemeleri
+  - auth     # Authentication related changes
+  - ui       # User interface changes
+  - api      # API related changes
+  - db       # Database related changes
+  - core     # Core functions
+  - config   # Configuration changes
+  - deps     # Dependency updates
 
-# Kurallar
+# Rules
 rules:
-  - title_max_length: 72     # Başlık maksimum 72 karakter
-  - description_max_length: 500  # Açıklama maksimum 500 karakter
-  - require_scope: false     # Kapsam zorunlu değil
-  - require_description: false  # Detaylı açıklama zorunlu değil
+  - title_max_length: 72     # Maximum title length
+  - description_max_length: 500  # Maximum description length
+  - require_scope: false     # Scope is not required
+  - require_description: false  # Detailed description is not required
 
-# Örnekler
+# Examples
 examples:
-  - "feat(ui): isim listesi için arama ve filtreleme eklendi"
-  - "fix(api): bağlantı hatası düzeltildi"
-  - "refactor(core): isim ekleme fonksiyonu yeniden yazıldı"
-  - "style(ui): buton stilleri düzenlendi"
-  - "docs: README güncellendi"
-  - "test(auth): oturum açma testleri eklendi"
-  - "chore(deps): paketler güncellendi"
-  - "perf(db): sorgu performansı iyileştirildi"
+  - "feat(ui): added search and filtering for name list"
+  - "fix(api): fixed connection error"
+  - "refactor(core): rewrote name addition function"
+  - "style(ui): adjusted button styles"
+  - "docs: updated README"
+  - "test(auth): added login tests"
+  - "chore(deps): updated packages"
+  - "perf(db): improved query performance"
 
-# Commit Mesajı Şablonu
+# Commit Message Template
 template: |
   <type>(<scope>): <description>
 
-  Detaylı Açıklama:
-  - Yapılan değişiklikler
-  - Değişikliğin nedeni
-  - Etkilenen alanlar
+  Detailed Description:
+  - Changes made
+  - Reason for change
+  - Affected areas
 
-  İlgili Issue: #123 
+  Related Issue: #123 

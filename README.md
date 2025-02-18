@@ -24,7 +24,7 @@
 
 1. Repoyu klonlayın:
 ```bash
-git clone https://github.com/kullanici/isim-listem.git
+git clone https://github.com/apo-bozdag/isim-listem.git
 cd isim-listem
 ```
 
