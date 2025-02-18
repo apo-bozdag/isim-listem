@@ -1,0 +1,56 @@
+# İsim Listem Projesi Commit Kuralları
+
+# Commit Mesajı Formatı
+format:
+  title: "<type>(<scope>): <description>"
+  description: "Detaylı açıklama (isteğe bağlı)"
+
+# Commit Tipleri
+types:
+  - feat     # Yeni özellik
+  - fix      # Hata düzeltmesi
+  - refactor # Kod yeniden düzenleme
+  - style    # Stil değişiklikleri (boşluk, format, noktalama vb.)
+  - docs     # Dokümantasyon değişiklikleri
+  - test     # Test ekleme veya düzenleme
+  - chore    # Yapılandırma, derleme vb. değişiklikler
+  - perf     # Performans iyileştirmeleri
+
+# Commit Kapsamları
+scopes:
+  - auth     # Kimlik doğrulama ile ilgili değişiklikler
+  - ui       # Kullanıcı arayüzü değişiklikleri
+  - api      # API ile ilgili değişiklikler
+  - db       # Veritabanı ile ilgili değişiklikler
+  - core     # Çekirdek fonksiyonlar
+  - config   # Yapılandırma değişiklikleri
+  - deps     # Bağımlılık güncellemeleri
+
+# Kurallar
+rules:
+  - title_max_length: 72     # Başlık maksimum 72 karakter
+  - description_max_length: 500  # Açıklama maksimum 500 karakter
+  - require_scope: false     # Kapsam zorunlu değil
+  - require_description: false  # Detaylı açıklama zorunlu değil
+
+# Örnekler
+examples:
+  - "feat(ui): isim listesi için arama ve filtreleme eklendi"
+  - "fix(api): bağlantı hatası düzeltildi"
+  - "refactor(core): isim ekleme fonksiyonu yeniden yazıldı"
+  - "style(ui): buton stilleri düzenlendi"
+  - "docs: README güncellendi"
+  - "test(auth): oturum açma testleri eklendi"
+  - "chore(deps): paketler güncellendi"
+  - "perf(db): sorgu performansı iyileştirildi"
+
+# Commit Mesajı Şablonu
+template: |
+  <type>(<scope>): <description>
+
+  Detaylı Açıklama:
+  - Yapılan değişiklikler
+  - Değişikliğin nedeni
+  - Etkilenen alanlar
+
+  İlgili Issue: #123 
