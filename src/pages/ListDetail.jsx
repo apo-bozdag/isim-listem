@@ -18,6 +18,7 @@ const ListDetail = () => {
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const { currentList, setCurrentList, loading, error, updateList, deleteList, setLoading, setError } = useListStore()
+  const [activeTab, setActiveTab] = useState('list') // 'list' veya 'comments'
   const [names, setNames] = useState([])
   const [sortOrder, setSortOrder] = useState('date') // 'date' veya 'alpha'
   const [searchQuery, setSearchQuery] = useState('')
@@ -467,6 +468,52 @@ const ListDetail = () => {
     }
   }, [listId])
 
+  // Revilink için style
+  useEffect(() => {
+    const style = document.createElement('style')
+    style.textContent = `
+      .revilink-reviews-embed {
+        background-color: transparent;
+      }
+
+      .revilink-reviews-embed .reaction-button-group {
+        justify-content: flex-start;
+      }
+
+      .revilink-reviews-embed .review-card .review-card__body {
+        background-color: transparent;
+      }
+
+      .revilink-reviews-embed .reply-card .reply-card__body {
+        background-color: transparent;
+      }
+
+      .revilink-reviews-embed .comment-form-card .comment-form-card__body {
+        background-color: transparent;
+      }
+    `
+    document.head.appendChild(style)
+
+    return () => {
+      document.head.removeChild(style)
+    }
+  }, [])
+
+  // Revilink script yükleme
+  useEffect(() => {
+    if (activeTab === 'comments') {
+      const script = document.createElement('script')
+      script.src = 'https://revilink.io/integration/embed/reviews.js'
+      script.async = true
+      script.charset = 'utf-8'
+      document.body.appendChild(script)
+
+      return () => {
+        document.body.removeChild(script)
+      }
+    }
+  }, [activeTab])
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -653,253 +700,301 @@ const ListDetail = () => {
             )}
 
             <div className="mt-6">
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                <div className="flex-1">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={handleSearch}
-                    placeholder="İsimlerde ara..."
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors"
-                  />
-                </div>
-                
-                <div className="flex flex-wrap gap-2">
-                  {isOwner && (
+              {/* Tab Başlıkları */}
+              <div className="border-b border-gray-200 mb-6">
+                <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                  <button
+                    onClick={() => setActiveTab('list')}
+                    className={`
+                      whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                      ${activeTab === 'list'
+                        ? 'border-violet-500 text-violet-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }
+                    `}
+                  >
+                    Liste
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('comments')}
+                    className={`
+                      whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                      ${activeTab === 'comments'
+                        ? 'border-violet-500 text-violet-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }
+                    `}
+                  >
+                    Yorumlar
+                  </button>
+                </nav>
+              </div>
+
+              {/* Tab İçerikleri */}
+              {activeTab === 'list' ? (
+                <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={handleSearch}
+                      placeholder="İsimlerde ara..."
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2">
+                    {isOwner && (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => setIsAddNameModalOpen(true)}
+                        className="group flex items-center gap-2 bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 shadow-sm hover:shadow-md transition-all duration-200"
+                      >
+                        <svg 
+                          className="w-4 h-4 transition-transform group-hover:scale-110" 
+                          fill="none" 
+                          viewBox="0 0 24 24" 
+                          stroke="currentColor"
+                        >
+                          <path 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth={2} 
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" 
+                          />
+                        </svg>
+                        İsim Ekle
+                      </Button>
+                    )}
+
                     <Button
-                      variant="primary"
+                      variant="outline"
                       size="sm"
-                      onClick={() => setIsAddNameModalOpen(true)}
-                      className="group flex items-center gap-2 bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 shadow-sm hover:shadow-md transition-all duration-200"
+                      onClick={handleSort}
+                      className="group flex items-center gap-2 hover:bg-violet-50 shadow-sm hover:shadow-md transition-all duration-200"
                     >
                       <svg 
-                        className="w-4 h-4 transition-transform group-hover:scale-110" 
+                        className="w-4 h-4 transition-transform group-hover:rotate-180" 
                         fill="none" 
                         viewBox="0 0 24 24" 
                         stroke="currentColor"
                       >
-                        <path 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round" 
-                          strokeWidth={2} 
-                          d="M12 6v6m0 0v6m0-6h6m-6 0H6" 
-                        />
+                        {sortOrder === 'date' ? (
+                          <path 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth={2} 
+                            d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" 
+                          />
+                        ) : (
+                          <path 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth={2} 
+                            d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" 
+                          />
+                        )}
                       </svg>
-                      İsim Ekle
+                      {sortOrder === 'date' ? 'Alfabetik Sırala' : 'Tarihe Göre Sırala'}
                     </Button>
-                  )}
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleSort}
-                    className="group flex items-center gap-2 hover:bg-violet-50 shadow-sm hover:shadow-md transition-all duration-200"
-                  >
-                    <svg 
-                      className="w-4 h-4 transition-transform group-hover:rotate-180" 
-                      fill="none" 
-                      viewBox="0 0 24 24" 
-                      stroke="currentColor"
-                    >
-                      {sortOrder === 'date' ? (
-                        <path 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round" 
-                          strokeWidth={2} 
-                          d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" 
-                        />
-                      ) : (
-                        <path 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round" 
-                          strokeWidth={2} 
-                          d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" 
-                        />
-                      )}
-                    </svg>
-                    {sortOrder === 'date' ? 'Alfabetik Sırala' : 'Tarihe Göre Sırala'}
-                  </Button>
-
-                  {isOwner && (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setIsEditModalOpen(true)}
-                        className="group flex items-center gap-2 hover:bg-violet-50 shadow-sm hover:shadow-md transition-all duration-200"
-                      >
-                        <svg 
-                          className="w-4 h-4 transition-transform group-hover:scale-110" 
-                          fill="none" 
-                          viewBox="0 0 24 24" 
-                          stroke="currentColor"
+                    {isOwner && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsEditModalOpen(true)}
+                          className="group flex items-center gap-2 hover:bg-violet-50 shadow-sm hover:shadow-md transition-all duration-200"
                         >
-                          <path 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round" 
-                            strokeWidth={2} 
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" 
-                          />
-                        </svg>
-                        Düzenle
-                      </Button>
-                      
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => setIsDeleteModalOpen(true)}
-                        className="group flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-sm hover:shadow-md transition-all duration-200"
-                      >
-                        <svg 
-                          className="w-4 h-4 transition-transform group-hover:scale-110" 
-                          fill="none" 
-                          viewBox="0 0 24 24" 
-                          stroke="currentColor"
+                          <svg 
+                            className="w-4 h-4 transition-transform group-hover:scale-110" 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            stroke="currentColor"
+                          >
+                            <path 
+                              strokeLinecap="round" 
+                              strokeLinejoin="round" 
+                              strokeWidth={2} 
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" 
+                            />
+                          </svg>
+                          Düzenle
+                        </Button>
+                        
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => setIsDeleteModalOpen(true)}
+                          className="group flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-sm hover:shadow-md transition-all duration-200"
                         >
-                          <path 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round" 
-                            strokeWidth={2} 
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" 
-                          />
-                        </svg>
-                        Sil
-                      </Button>
-                    </>
-                  )}
+                          <svg 
+                            className="w-4 h-4 transition-transform group-hover:scale-110" 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            stroke="currentColor"
+                          >
+                            <path 
+                              strokeLinecap="round" 
+                              strokeLinejoin="round" 
+                              strokeWidth={2} 
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" 
+                            />
+                          </svg>
+                          Sil
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="w-full">
+                  <iframe
+                    id="revilink-reviews-embed-iframe"
+                    src={`https://revilink.io/tr/embed/incelemeler?link=${encodeURIComponent(window.location.href)}&urlReactions=true&commentListHead=true&avatar=true&reply=true&like=true&commentFormAvatar=true&perPage=10&page=1`}
+                    frameBorder="0"
+                    width="100%"
+                    height="800"
+                    scrolling="no"
+                    allowTransparency="true"
+                    className="w-full"
+                  />
+                </div>
+              )}
 
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="grid gap-4"
-              >
-                {names.length > 0 ? (
-                  <>
-                    {names.map((name) => (
-                      <motion.div
-                        key={name.id}
-                        layout
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="text-lg font-medium text-gray-900">
-                              {name.name}
-                            </h3>
-                            {name.note && (
-                              <div className="prose prose-sm max-w-none mt-1 text-gray-600">
-                                <ReactMarkdown 
-                                  remarkPlugins={[remarkGfm]}
-                                  components={{
-                                    a: ({ node, ...props }) => (
-                                      <a 
-                                        {...props} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        className="text-violet-600 hover:text-violet-700 hover:underline"
-                                      />
-                                    ),
-                                    p: ({ node, ...props }) => (
-                                      <p {...props} className="!my-0" />
-                                    )
+              {activeTab === 'list' && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="grid gap-4"
+                >
+                  {names.length > 0 ? (
+                    <>
+                      {names.map((name) => (
+                        <motion.div
+                          key={name.id}
+                          layout
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="text-lg font-medium text-gray-900">
+                                {name.name}
+                              </h3>
+                              {name.note && (
+                                <div className="prose prose-sm max-w-none mt-1 text-gray-600">
+                                  <ReactMarkdown 
+                                    remarkPlugins={[remarkGfm]}
+                                    components={{
+                                      a: ({ node, ...props }) => (
+                                        <a 
+                                          {...props} 
+                                          target="_blank" 
+                                          rel="noopener noreferrer"
+                                          className="text-violet-600 hover:text-violet-700 hover:underline"
+                                        />
+                                      ),
+                                      p: ({ node, ...props }) => (
+                                        <p {...props} className="!my-0" />
+                                      )
+                                    }}
+                                  >
+                                    {name.note}
+                                  </ReactMarkdown>
+                                </div>
+                              )}
+                            </div>
+                            {isOwner && (
+                              <div className="flex gap-2">
+                                <button
+                                  className="text-gray-400 hover:text-violet-600 transition-colors"
+                                  onClick={() => {
+                                    setSelectedName(name)
+                                    setEditNameForm({
+                                      name: name.name,
+                                      note: name.note || ''
+                                    })
+                                    setIsEditNameModalOpen(true)
                                   }}
                                 >
-                                  {name.note}
-                                </ReactMarkdown>
+                                  <svg 
+                                    className="w-5 h-5" 
+                                    fill="none" 
+                                    viewBox="0 0 24 24" 
+                                    stroke="currentColor"
+                                  >
+                                    <path 
+                                      strokeLinecap="round" 
+                                      strokeLinejoin="round" 
+                                      strokeWidth={2} 
+                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" 
+                                    />
+                                  </svg>
+                                </button>
+                                <button
+                                  className="text-gray-400 hover:text-red-600 transition-colors"
+                                  onClick={() => {
+                                    setSelectedName(name)
+                                    setIsDeleteNameModalOpen(true)
+                                  }}
+                                >
+                                  <svg 
+                                    className="w-5 h-5" 
+                                    fill="none" 
+                                    viewBox="0 0 24 24" 
+                                    stroke="currentColor"
+                                  >
+                                    <path 
+                                      strokeLinecap="round" 
+                                      strokeLinejoin="round" 
+                                      strokeWidth={2} 
+                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" 
+                                    />
+                                  </svg>
+                                </button>
                               </div>
                             )}
                           </div>
-                          {isOwner && (
-                            <div className="flex gap-2">
-                              <button
-                                className="text-gray-400 hover:text-violet-600 transition-colors"
-                                onClick={() => {
-                                  setSelectedName(name)
-                                  setEditNameForm({
-                                    name: name.name,
-                                    note: name.note || ''
-                                  })
-                                  setIsEditNameModalOpen(true)
-                                }}
-                              >
-                                <svg 
-                                  className="w-5 h-5" 
-                                  fill="none" 
-                                  viewBox="0 0 24 24" 
-                                  stroke="currentColor"
-                                >
-                                  <path 
-                                    strokeLinecap="round" 
-                                    strokeLinejoin="round" 
-                                    strokeWidth={2} 
-                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" 
-                                  />
-                                </svg>
-                              </button>
-                              <button
-                                className="text-gray-400 hover:text-red-600 transition-colors"
-                                onClick={() => {
-                                  setSelectedName(name)
-                                  setIsDeleteNameModalOpen(true)
-                                }}
-                              >
-                                <svg 
-                                  className="w-5 h-5" 
-                                  fill="none" 
-                                  viewBox="0 0 24 24" 
-                                  stroke="currentColor"
-                                >
-                                  <path 
-                                    strokeLinecap="round" 
-                                    strokeLinejoin="round" 
-                                    strokeWidth={2} 
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" 
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          )}
+                        </motion.div>
+                      ))}
+                      
+                      {names.length < totalCount && (
+                        <div className="text-center mt-4">
+                          <Button
+                            variant="outline"
+                            onClick={handleLoadMore}
+                            disabled={isLoadingMore}
+                            className="w-full sm:w-auto"
+                          >
+                            {isLoadingMore ? (
+                              <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 border-2 border-violet-600 border-t-transparent rounded-full animate-spin"></div>
+                                Yükleniyor...
+                              </div>
+                            ) : (
+                              'Daha Fazla Göster'
+                            )}
+                          </Button>
                         </div>
-                      </motion.div>
-                    ))}
-                    
-                    {names.length < totalCount && (
-                      <div className="text-center mt-4">
-                        <Button
-                          variant="outline"
-                          onClick={handleLoadMore}
-                          disabled={isLoadingMore}
-                          className="w-full sm:w-auto"
-                        >
-                          {isLoadingMore ? (
-                            <div className="flex items-center gap-2">
-                              <div className="w-4 h-4 border-2 border-violet-600 border-t-transparent rounded-full animate-spin"></div>
-                              Yükleniyor...
-                            </div>
-                          ) : (
-                            'Daha Fazla Göster'
-                          )}
-                        </Button>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="text-center py-12">
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      {searchQuery ? 'Aramanızla eşleşen isim bulunamadı' : 'Henüz isim eklenmemiş'}
-                    </h3>
-                    {isOwner && !searchQuery && (
-                      <p className="text-gray-600">
-                        Sağ üstteki "İsim Ekle" butonuna tıklayarak listeye isim ekleyebilirsin.
-                      </p>
-                    )}
-                  </div>
-                )}
-              </motion.div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-12">
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        {searchQuery ? 'Aramanızla eşleşen isim bulunamadı' : 'Henüz isim eklenmemiş'}
+                      </h3>
+                      {isOwner && !searchQuery && (
+                        <p className="text-gray-600">
+                          Sağ üstteki "İsim Ekle" butonuna tıklayarak listeye isim ekleyebilirsin.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+              )}
             </div>
           </div>
 
